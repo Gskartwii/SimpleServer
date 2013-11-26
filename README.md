@@ -29,4 +29,4 @@ ____________________
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
 
-	[1]: http://luaj.org/luaj/README.html
+[1]: http://luaj.org/luaj/README.html
