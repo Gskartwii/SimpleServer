@@ -41,7 +41,6 @@ public class HttpRequestHandler extends Thread{
 				_server.put("REQUEST_METHOD", req[0]);
 				_server.put("REQUEST_URI", req[1]);
 				_server.put("SERVER_PROTOCOL", req[2]);
-				System.out.println(_server.get("REQUEST_METHOD") + " + " + _server.get("SERVER_PROTOCOL") + " + " + _server.get("REQUEST_URI"));
 			}else{
 				String[] brokenUp = s.split(": ");
 				if(brokenUp.length > 0){
