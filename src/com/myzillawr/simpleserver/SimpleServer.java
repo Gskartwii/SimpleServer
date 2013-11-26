@@ -1,5 +1,6 @@
 package com.myzillawr.simpleserver;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -73,14 +74,20 @@ public class SimpleServer implements Runnable{
 
 	@Override
 	public void run(){
+		File docFile = new File(config.getDocumentRoot());
+		if(!docFile.exists()){
+			docFile.mkdir();
+		}
 		try{
 			serv = new ServerSocket(config.getPort());
 		}catch(IOException e){
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		HashMap<String, Object> serverDefaults = new HashMap<String, Object>();
 		serverDefaults.put("SERVER_ADDR", getIp());
 		serverDefaults.put("SERVER_SOFTWARE", "Myzilla Web Resources SimpleServer");
+		serverDefaults.put("DOCUMENT_ROOT", docFile.getAbsolutePath());
 		while(true){
 			try{
 				Socket client = serv.accept();
@@ -88,7 +95,6 @@ public class SimpleServer implements Runnable{
 			}catch (IOException e){
 				e.printStackTrace();
 			}
-			
 		}
 	}
 }

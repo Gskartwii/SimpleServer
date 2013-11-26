@@ -13,13 +13,14 @@ public class HttpRequestHandler extends Thread{
 	private BufferedReader in;
 	private BufferedWriter out;
 	
-	//TODO: Add DOCUMENT_ROOT, QUERY_STRING, and PATH_INFO
+	//TODO: Add PATH_INFO
 	private HashMap<String, Object> _server;
 	
 	public HttpRequestHandler(Socket client, HashMap<String, Object> serverDefaults) throws IOException{
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+		
 		//Init Server Variables
 		_server = new HashMap<String, Object>();
 		_server.put("SERVER_ADDR", serverDefaults.get("SERVER_ADDR"));
@@ -52,6 +53,18 @@ public class HttpRequestHandler extends Thread{
 				}
 			}
 		}
+		if(_server.get("REQUEST_URI") != null){
+			String queryString = (String)_server.get("REQUEST_URI");
+			if(queryString.indexOf("?") != -1){
+				queryString = queryString.substring(queryString.indexOf("?") + 1);
+				_server.put("QUERY_STRING", queryString);
+			}
+		}else{
+			close();
+		}
+		if(!_server.containsKey("QUERY_STRING")){
+			_server.put("QUERY_STRING", "");
+		}
 	}
 	
 	//Multi-Try/Catch in case out or in throws an exception.
@@ -75,6 +88,6 @@ public class HttpRequestHandler extends Thread{
 
 	@Override
 	public void run(){
-		
+		close();
 	}
 }
