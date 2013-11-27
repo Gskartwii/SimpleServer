@@ -96,7 +96,7 @@ public class SimpleServerLua extends Globals{
 				LuaString s = SimpleServerLua.this.tostring(args.arg(i)).strvalue();
 				System.out.write(s.m_bytes, s.m_offset, s.m_length);
 			}
-			System.out.println();
+			System.out.write('\n');
 			return NONE;
 		}
 	}

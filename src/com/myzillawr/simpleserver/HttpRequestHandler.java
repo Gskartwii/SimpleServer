@@ -9,16 +9,21 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashMap;
 
+import com.myzillawr.simpleserver.http.HttpRequest;
+
 public class HttpRequestHandler extends Thread{
-	private Socket client;
-	private BufferedReader in;
-	private BufferedWriter out;
+	public Socket client;
+	public BufferedReader in;
+	public BufferedWriter out;
 	
 	//TODO: Add PATH_INFO
-	private HashMap<String, Object> _server;
+	public HashMap<String, Object> _server;
+	
+	public File documentRoot;
 	
 	public HttpRequestHandler(Socket client, HashMap<String, Object> serverDefaults, File documentRoot) throws IOException{
 		this.client = client;
+		this.documentRoot = documentRoot;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 		
@@ -93,6 +98,40 @@ public class HttpRequestHandler extends Thread{
 
 	@Override
 	public void run(){
+		if(_server.get("REQUEST_URI") != null){
+			String page = "/";
+			String pageTemp = (String)_server.get("REQUEST_URI");
+			int qPos = pageTemp.indexOf("?");
+			if(qPos != -1){
+				pageTemp = pageTemp.substring(0, qPos);
+			}
+			if(pageTemp.startsWith("/")){
+				pageTemp = pageTemp.substring(1);
+			}
+			String[] pagePart = pageTemp.split("/");
+			String endBit = null;
+			for(int i = 0; i < pagePart.length; i++){
+				if(pagePart[i] != ".." && pagePart[i] != "../" && pagePart[i] != "..\\" && pagePart[i] != "/.." && pagePart[i] != "\\.." && pagePart[i] != "/../" && pagePart[i] != "\\..\\"){
+					endBit = pagePart[i];
+					if(new File(documentRoot, page + pagePart[i]).exists()){
+						page = page + pagePart[i];
+					}else{
+						break;
+					}
+				}
+			}
+			page = page.replace("/", "\\");
+			if(endBit != null){
+				if(page.endsWith("\\")){
+					page = page + endBit;
+				}
+			}
+			File servePage = new File(documentRoot.getAbsolutePath() + page);
+			if(servePage.isDirectory()){
+				servePage = new File(servePage, "index.lua");
+			}
+			new HttpRequest(this, servePage);
+		}
 		close();
 	}
 }

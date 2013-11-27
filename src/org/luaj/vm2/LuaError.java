@@ -54,6 +54,24 @@ public class LuaError extends RuntimeException {
 			return fileline + " " + m;
 		return m;
 	}
+	
+	/**
+	 * Used internally to show error messages on web pages.
+	 */
+	public int getErrorLine(){
+		if(fileline != null){
+			String webFile = fileline;
+			if(webFile.lastIndexOf(":") != -1){
+				webFile = webFile.substring(webFile.lastIndexOf(":") + 1);
+			}
+			return Integer.parseInt(webFile);
+		}
+		return 0;
+	}
+	
+	public String getErrorMessage(){
+		return super.getMessage();
+	}
 
 	/** Construct LuaError when a program exception occurs. 
 	 * <p> 

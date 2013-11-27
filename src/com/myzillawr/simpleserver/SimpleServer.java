@@ -22,6 +22,8 @@ public class SimpleServer implements Runnable{
 	
 	private ServerSocket serv;
 	
+	public static String VERSION = "1.0.0";
+	
 	public SimpleServer(){
 		running = false;
 	}
