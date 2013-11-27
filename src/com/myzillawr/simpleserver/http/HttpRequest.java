@@ -28,17 +28,21 @@ public class HttpRequest {
 		this.page = page;
 		htmlContent = "";
 		if(page.exists()){
-			SimpleServerLua lua = new SimpleServerLua();
-			setupEnv(lua);
-			try{
-				lua.dofile(page);
-				lua.get("exit").call();
-			}catch(LuaError e){
-				int line = e.getErrorLine();
-				String msg = e.getErrorMessage();
-				write("Fatal Error: <b>" + msg + "</b> on line <b>" + line + "</b>");
-				handleHTMLContent();
-				close();
+			if(page.getName().toLowerCase().endsWith(".lua")){
+				SimpleServerLua lua = new SimpleServerLua();
+				setupEnv(lua);
+				try{
+					lua.dofile(page);
+					lua.get("exit").call();
+				}catch(LuaError e){
+					int line = e.getErrorLine();
+					String msg = e.getErrorMessage();
+					write("Fatal Error: <b>" + msg + "</b> on line <b>" + line + "</b>");
+					handleHTMLContent();
+					close();
+				}
+			}else{
+				//TODO: Handle other file types.
 			}
 		}else{
 			handleError(404, "Not Found");
