@@ -1,17 +1,21 @@
 package com.myzillawr.simpleserver.config;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.OneArgFunction;
+
+import com.myzillawr.simpleserver.lua.SimpleServerLua;
 
 public class DefaultServerConfig extends ServerConfig{
 	private int port;
 	private boolean threaded;
 	private String documentRoot;
 	
-	//TODO: Load default config from file, if file exists.
+	Integer tport = null;
+	Boolean tthreaded = null;
+	String tdocumentRoot = null;
+	
 	public DefaultServerConfig(){
 		this(80, false, "/www");
 	}
@@ -19,38 +23,44 @@ public class DefaultServerConfig extends ServerConfig{
 	public DefaultServerConfig(File configFile){
 		if(configFile.exists()){
 			try{
-				BufferedReader br = new BufferedReader(new FileReader(configFile));
-				String s = null;
-				Integer tport = null;
-				Boolean tthreaded = null; 
-				String tdocumentRoot = null;
-				try{
-					while((s = br.readLine()) != null){
-						if(s.startsWith("port:")){
-							s = s.substring(5);
-							if(s.startsWith(" ")){
-								s = s.substring(1);
-							}
-							tport = Integer.parseInt(s);
+				final SimpleServerLua lua = new SimpleServerLua();
+				lua.set("setPort", new OneArgFunction(){
+					@Override
+					public LuaValue call(LuaValue arg){
+						if(!arg.isint()){
+							throw new RuntimeException("setPort: Argument 1 must be an integer.");
+						}else{
+							tport = new Integer(arg.toint());
+							lua.set("setPort", NIL);
 						}
-						if(s.startsWith("threaded:")){
-							s = s.substring(9);
-							if(s.startsWith(" ")){
-								s = s.substring(1);
-							}
-							tthreaded = Boolean.parseBoolean(s);
-						}
-						if(s.startsWith("documentroot:")){
-							s = s.substring(13);
-							if(s.startsWith(" ")){
-								s = s.substring(1);
-							}
-							tdocumentRoot = s;
-						}
+						return NIL;
 					}
-				}catch (IOException e){
-					e.printStackTrace();
-				}
+				});
+				lua.set("setThreaded", new OneArgFunction(){
+					@Override
+					public LuaValue call(LuaValue arg){
+						if(!arg.isboolean()){
+							throw new RuntimeException("setThreaded: Argument 1 must be a boolean.");
+						}else{
+							tthreaded = arg.toboolean();
+							lua.set("setThreaded", NIL);
+						}
+						return NIL;
+					}
+				});
+				lua.set("setDocumentRoot", new OneArgFunction(){
+					@Override
+					public LuaValue call(LuaValue arg){
+						if(!arg.isstring()){
+							throw new RuntimeException("setDocumentRoot: Argument 1 must be a string.");
+						}else{
+							tdocumentRoot = arg.tojstring();
+							lua.set("setDocumentRoot", NIL);
+						}
+						return NIL;
+					}
+				});
+				lua.dolocalfile(configFile);
 				if(tport != null){
 					port = tport;
 				}else{
@@ -64,9 +74,9 @@ public class DefaultServerConfig extends ServerConfig{
 				if(tdocumentRoot != null){
 					documentRoot = tdocumentRoot;
 				}else{
-					documentRoot = "/www";
+					documentRoot = "www/";
 				}
-			}catch(FileNotFoundException e){
+			}catch (Exception e){
 				e.printStackTrace();
 			}
 		}else{

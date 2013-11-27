@@ -2,6 +2,7 @@ package com.myzillawr.simpleserver;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -16,7 +17,7 @@ public class HttpRequestHandler extends Thread{
 	//TODO: Add PATH_INFO
 	private HashMap<String, Object> _server;
 	
-	public HttpRequestHandler(Socket client, HashMap<String, Object> serverDefaults) throws IOException{
+	public HttpRequestHandler(Socket client, HashMap<String, Object> serverDefaults, File documentRoot) throws IOException{
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
@@ -57,6 +58,10 @@ public class HttpRequestHandler extends Thread{
 			String queryString = (String)_server.get("REQUEST_URI");
 			if(queryString.indexOf("?") != -1){
 				queryString = queryString.substring(queryString.indexOf("?") + 1);
+				int indexOf = queryString.indexOf("/");
+				if(indexOf != -1){
+					queryString = queryString.substring(0, indexOf);
+				}
 				_server.put("QUERY_STRING", queryString);
 			}
 		}else{

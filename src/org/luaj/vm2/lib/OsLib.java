@@ -68,7 +68,7 @@ import org.luaj.vm2.Varargs;
  * and loaded into the globals table. 
  * <p>
   * @see LibFunction
- * @see JseOsLib
+ * @see SimpleServerOsLib
  * @see JsePlatform
  * @see JmePlatform
  * @see <a href="http://www.lua.org/manual/5.1/manual.html#5.8">http://www.lua.org/manual/5.1/manual.html#5.8</a>

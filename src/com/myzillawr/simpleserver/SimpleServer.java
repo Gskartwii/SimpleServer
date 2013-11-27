@@ -37,11 +37,11 @@ public class SimpleServer implements Runnable{
 		}
 	}
 
-	public void setConfig(ServerConfig config) throws Exception{
+	public void setConfig(ServerConfig config){
 		if(!running){
 			this.config = config;
 		}else{
-			throw new Exception("Attempt to set config while running.");
+			throw new RuntimeException("Attempt to set config while running.");
 		}
 	}
 	
@@ -74,27 +74,31 @@ public class SimpleServer implements Runnable{
 
 	@Override
 	public void run(){
-		File docFile = new File(config.getDocumentRoot());
-		if(!docFile.exists()){
-			docFile.mkdir();
-		}
-		try{
-			serv = new ServerSocket(config.getPort());
-		}catch(IOException e){
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		HashMap<String, Object> serverDefaults = new HashMap<String, Object>();
-		serverDefaults.put("SERVER_ADDR", getIp());
-		serverDefaults.put("SERVER_SOFTWARE", "Myzilla Web Resources SimpleServer");
-		serverDefaults.put("DOCUMENT_ROOT", docFile.getAbsolutePath());
-		while(true){
-			try{
-				Socket client = serv.accept();
-				new HttpRequestHandler(client, serverDefaults).start();
-			}catch (IOException e){
-				e.printStackTrace();
+		if(config != null){
+			File docFile = new File(config.getDocumentRoot());
+			if(!docFile.exists()){
+				docFile.mkdir();
 			}
+			try{
+				serv = new ServerSocket(config.getPort());
+			}catch(IOException e){
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			HashMap<String, Object> serverDefaults = new HashMap<String, Object>();
+			serverDefaults.put("SERVER_ADDR", getIp());
+			serverDefaults.put("SERVER_SOFTWARE", "Myzilla Web Resources SimpleServer");
+			serverDefaults.put("DOCUMENT_ROOT", docFile.getAbsolutePath());
+			while(true){
+				try{
+					Socket client = serv.accept();
+					new HttpRequestHandler(client, serverDefaults, docFile).start();
+				}catch (IOException e){
+					e.printStackTrace();
+				}
+			}
+		}else{
+			throw new RuntimeException("You must set the configuration before starting the server.");
 		}
 	}
 }

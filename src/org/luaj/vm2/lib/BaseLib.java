@@ -418,7 +418,7 @@ public class BaseLib extends TwoArgFunction implements ResourceFinder {
 	 * @param mode 
 	 * @return Varargs containing chunk, or NIL,error-text on error
 	 */
-	public Varargs loadFile(String filename, String mode, LuaValue env) {
+	public Varargs loadFile(String filename, String mode, LuaValue env){
 		InputStream is = globals.FINDER.findResource(filename);
 		if ( is == null )
 			return varargsOf(NIL, valueOf("cannot open "+filename+": No such file or directory"));
