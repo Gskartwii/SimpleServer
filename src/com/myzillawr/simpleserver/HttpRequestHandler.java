@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.myzillawr.simpleserver.http.HttpRequest;
@@ -16,21 +17,20 @@ public class HttpRequestHandler extends Thread{
 	public BufferedReader in;
 	public BufferedWriter out;
 	
-	//TODO: Add PATH_INFO
 	public HashMap<String, Object> _server;
 	
-	public File documentRoot;
+	private SimpleServer server;
 	
-	public HttpRequestHandler(Socket client, HashMap<String, Object> serverDefaults, File documentRoot) throws IOException{
+	public HttpRequestHandler(Socket client, SimpleServer simpleServer) throws IOException{
 		this.client = client;
-		this.documentRoot = documentRoot;
+		this.server = simpleServer;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 		
 		//Init Server Variables
 		_server = new HashMap<String, Object>();
-		_server.put("SERVER_ADDR", serverDefaults.get("SERVER_ADDR"));
-		_server.put("SERVER_SOFTWARE", serverDefaults.get("SERVER_SOFTWARE"));
+		_server.put("SERVER_ADDR", server.getServerDefaults().get("SERVER_ADDR"));
+		_server.put("SERVER_SOFTWARE", server.getServerDefaults().get("SERVER_SOFTWARE"));
 		_server.put("REQUEST_TIME", (int)(System.currentTimeMillis() / 1000L));
 		_server.put("REQUEST_TIME_FLOAT", System.currentTimeMillis());
 		String[] remoteaddr = client.getRemoteSocketAddress().toString().substring(1).split(":");
@@ -113,7 +113,7 @@ public class HttpRequestHandler extends Thread{
 			for(int i = 0; i < pagePart.length; i++){
 				if(pagePart[i] != ".." && pagePart[i] != "../" && pagePart[i] != "..\\" && pagePart[i] != "/.." && pagePart[i] != "\\.." && pagePart[i] != "/../" && pagePart[i] != "\\..\\"){
 					endBit = pagePart[i];
-					if(new File(documentRoot, page + pagePart[i]).exists()){
+					if(new File(server.getDocumentRoot(), page + pagePart[i]).exists()){
 						page = page + pagePart[i];
 					}else{
 						break;
@@ -126,12 +126,16 @@ public class HttpRequestHandler extends Thread{
 					page = page + endBit;
 				}
 			}
-			File servePage = new File(documentRoot.getAbsolutePath() + page);
+			File servePage = new File(server.getDocumentRoot().getAbsolutePath() + page);
 			if(servePage.isDirectory()){
 				servePage = new File(servePage, "index.lua");
 			}
 			new HttpRequest(this, servePage);
 		}
 		close();
+	}
+
+	public String dateFormat(Date date){
+		return server.dateFormat(date);
 	}
 }

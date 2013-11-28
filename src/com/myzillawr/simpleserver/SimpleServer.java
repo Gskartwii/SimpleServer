@@ -9,6 +9,8 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -23,6 +25,11 @@ public class SimpleServer implements Runnable{
 	private ServerSocket serv;
 	
 	public static String VERSION = "1.0.0";
+	
+	private SimpleDateFormat f;
+	private HashMap<String, Object> serverDefaults;
+	
+	private File documentRoot;
 	
 	public SimpleServer(){
 		running = false;
@@ -77,9 +84,9 @@ public class SimpleServer implements Runnable{
 	@Override
 	public void run(){
 		if(config != null){
-			File docFile = new File(config.getDocumentRoot());
-			if(!docFile.exists()){
-				docFile.mkdir();
+			documentRoot = new File(config.getDocumentRoot());
+			if(!documentRoot.exists()){
+				documentRoot.mkdir();
 			}
 			try{
 				serv = new ServerSocket(config.getPort());
@@ -87,14 +94,15 @@ public class SimpleServer implements Runnable{
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			HashMap<String, Object> serverDefaults = new HashMap<String, Object>();
+			f = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
+			serverDefaults = new HashMap<String, Object>();
 			serverDefaults.put("SERVER_ADDR", getIp());
 			serverDefaults.put("SERVER_SOFTWARE", "Myzilla Web Resources SimpleServer");
-			serverDefaults.put("DOCUMENT_ROOT", docFile.getAbsolutePath());
+			serverDefaults.put("DOCUMENT_ROOT", documentRoot.getAbsolutePath());
 			while(true){
 				try{
 					Socket client = serv.accept();
-					new HttpRequestHandler(client, serverDefaults, docFile).start();
+					new HttpRequestHandler(client, this).start();
 				}catch (IOException e){
 					e.printStackTrace();
 				}
@@ -102,5 +110,17 @@ public class SimpleServer implements Runnable{
 		}else{
 			throw new RuntimeException("You must set the configuration before starting the server.");
 		}
+	}
+	
+	public HashMap<String, Object> getServerDefaults(){
+		return serverDefaults;
+	}
+
+	public String dateFormat(Date date){
+		return f.format(date);
+	}
+
+	public File getDocumentRoot(){
+		return documentRoot;
 	}
 }

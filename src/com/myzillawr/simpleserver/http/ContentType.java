@@ -1,6 +1,7 @@
 package com.myzillawr.simpleserver.http;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 public class ContentType {
@@ -9,6 +10,8 @@ public class ContentType {
 		cTypes = new HashMap<String, String>();
 		//Lua
 		cTypes.put(".lua", "text/html"); //This one can be changed using the header() function.
+		cTypes.put(".lhtm", "text/html");
+		cTypes.put(".lhtml", "text/html");
 		
 		//HTML
 		cTypes.put(".html", "text/html");
@@ -29,14 +32,50 @@ public class ContentType {
 		cTypes.put("DEFAULT CONTENT TYPE", "text/plain");
 	}
 	
+	private static HashMap<String, Class<? extends Page>> pageTypes;
+	static{
+		pageTypes = new HashMap<String, Class<? extends Page>>();
+		//Lua
+		pageTypes.put(".lua", FullLuaPage.class);
+		pageTypes.put(".lhtm", MixedLuaPage.class);
+		pageTypes.put(".lhtml", MixedLuaPage.class);
+		
+		//HTML
+		pageTypes.put(".html", ContentPage.class);
+		pageTypes.put(".htm", ContentPage.class);
+		
+		pageTypes.put(".txt", ContentPage.class);
+		pageTypes.put(".css", ContentPage.class);
+		pageTypes.put(".js", ContentPage.class);
+		pageTypes.put(".xml", ContentPage.class);
+		
+		//IMAGES
+		pageTypes.put(".gif", ImagePage.class);
+		pageTypes.put(".jpeg", ImagePage.class);
+		pageTypes.put(".jpg", ImagePage.class);
+		pageTypes.put(".png", ImagePage.class);
+		pageTypes.put(".svg", ImagePage.class);
+		
+		pageTypes.put("DEFAULT TYPE", ContentPage.class);
+	}
+	
 	public static String getContentType(File page){
-		String flower = page.getName().toLowerCase();
 		String[] keys = cTypes.keySet().toArray(new String[cTypes.keySet().size()]);
 		for(int i = 0; i < keys.length; i++){
-			if(flower.endsWith(keys[i])){
+			if(page.getName().toLowerCase().endsWith(keys[i])){
 				return cTypes.get(keys[i]);
 			}
 		}
 		return cTypes.get("DEFAULT CONTENT TYPE");
+	}
+
+	public static Page handlePage(HttpRequest httpRequest) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException{
+		String[] keys = cTypes.keySet().toArray(new String[cTypes.keySet().size()]);
+		for(int i = 0; i < keys.length; i++){
+			if(httpRequest.getFile().getName().toLowerCase().endsWith(keys[i])){
+				return pageTypes.get(keys[i]).getConstructor(HttpRequest.class).newInstance(httpRequest);
+			}
+		}
+		return pageTypes.get("DEFAULT TYPE").getConstructor(HttpRequest.class).newInstance(httpRequest);
 	}
 }

@@ -1,0 +1,11 @@
+<DOCTYPE html>
+<html>
+<head>
+	<title><?lua write("LHTLM Test Page"); ?></title>
+</head>
+<body>
+	<h2>Hi, from SimpleServer!</h2>
+	<?lua write("2nd Chunk"); ?>
+	<?lua write(test()); ?>
+</body>
+</html>

@@ -20,6 +20,8 @@ import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
 import org.luaj.vm2.lib.jse.JseOsLib;
 
+import com.myzillawr.simpleserver.StringInputStream;
+
 public class SimpleServerLua extends Globals{
 	public SimpleServerLua(){
 		load(new JseBaseLib());
@@ -38,6 +40,23 @@ public class SimpleServerLua extends Globals{
 	public void dolocalfile(File file){
 		set("print", new print("[" + file.getName() + "] "));
 		dofile(file, true);
+	}
+	
+	public void dostring(String fileName, String content){
+		set("print", new print("[" + fileName + "] "));
+		StringInputStream is = null;
+		try{
+			is = new StringInputStream(content);
+			baselib.loadStream(is, fileName, "bt", this).arg1().invoke();
+		}finally{
+			if(is != null){
+				try{
+					is.close();
+				}catch(IOException e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public void dofile(File file){
