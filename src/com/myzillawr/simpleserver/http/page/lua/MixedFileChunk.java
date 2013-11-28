@@ -1,4 +1,4 @@
-package com.myzillawr.simpleserver.http;
+package com.myzillawr.simpleserver.http.page.lua;
 
 import com.myzillawr.simpleserver.lua.SimpleServerLua;
 

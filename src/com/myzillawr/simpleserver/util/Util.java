@@ -1,4 +1,4 @@
-package com.myzillawr.simpleserver;
+package com.myzillawr.simpleserver.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

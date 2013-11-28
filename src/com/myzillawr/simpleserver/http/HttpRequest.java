@@ -6,7 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.myzillawr.simpleserver.HttpRequestHandler;
 import com.myzillawr.simpleserver.SimpleServer;
 
 public class HttpRequest {
@@ -16,7 +15,43 @@ public class HttpRequest {
 	public HttpRequest(HttpRequestHandler handler, File page){
 		this.handler = handler;
 		this.file = page;
-		if(page.exists()){
+		if(page.isDirectory()){
+			String[] indexNames = handler.getIndexNames();
+			for(int i = 0; i < indexNames.length; i++){
+				if(new File(page, indexNames[i]).exists()){
+					page = new File(page, indexNames[i]);
+					break;
+				}
+			}
+			if(page.isDirectory()){
+				String fileList = "<li><a href=\"../\">Parent Directory</a></li>";
+				File[] fileNames = page.listFiles();
+				for(int i = 0; i < fileNames.length; i++){
+					String fileName = fileNames[i].getName();
+					if(fileNames[i].isDirectory()){
+						fileName = fileName + "/";
+					}
+					fileList = fileList + "<li><a href=\"" + fileName + "\">" + fileName + "</a></li>";
+					if(i != fileNames.length){
+						fileList = fileList + '\n';
+					}
+				}
+				serverPage("Index of " + (String)handler._server.get("REQUEST_URI"), "<h1>Index of " + (String)handler._server.get("REQUEST_URI") + "</h1><ul>" + fileList + "</ul>", "200 OK");
+				
+			}else{
+				handlePage();
+			}
+		}else{
+			if(page.isFile()){
+				handlePage();
+			}else{
+				handleError(500, "Internal Server Error");
+			}
+		}
+	}
+	
+	private void handlePage(){
+		if(file.exists()){
 			try{
 				ContentType.handlePage(this);
 			}catch(Exception e){
@@ -48,6 +83,25 @@ public class HttpRequest {
 			}
 		}
 	}
+	
+	public void serverPage(String title, String body, String httpCode){
+		String content = "<DOCTYPE html>" + '\n'
+			+ "<html>" + '\n'
+			+ "<head>" + '\n'
+			+ '\r' + "<title>" + title + "</title>" + '\n'
+			+ "</head>" + '\n'
+			+ "<body>" + '\n'
+			+ body + '\n'
+			+ "<address>SimpleServer HTTP Server on port " + getServerPort() + ".</address>" + '\n'
+			+ "</body>" + '\n'
+			+ "</html>";
+		out("HTTP/1.0 " + httpCode  +  "\r\n");
+		standardHeaders();
+		out("Content-Type: text/html\r\n");
+		out("Content-Length: " + content.length() + "\r\n");
+		out("\r\n");
+		out(content);
+	}
 
 	public void handleError(int statusCode, String status){
 		String htmlContent = "<!DOCTYPE HTML><html><head><title>" + statusCode + " " + status + "</title></head><body><h1>" + status + "</h1><p>The requested file was not found on this server.</p><hr><address>SimpleServer Port 80</address></body></html>";
@@ -75,5 +129,9 @@ public class HttpRequest {
 
 	public File getFile(){
 		return file;
+	}
+
+	public int getServerPort(){
+		return handler.getServerPort();
 	}
 }

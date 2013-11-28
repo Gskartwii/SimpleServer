@@ -1,8 +1,10 @@
-package com.myzillawr.simpleserver.http;
+package com.myzillawr.simpleserver.http.page;
 
 import java.util.Date;
 
-import com.myzillawr.simpleserver.Util;
+import com.myzillawr.simpleserver.http.ContentType;
+import com.myzillawr.simpleserver.http.HttpRequest;
+import com.myzillawr.simpleserver.util.Util;
 
 public class ContentPage extends Page{
 	public ContentPage(HttpRequest req){

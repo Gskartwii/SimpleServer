@@ -4,7 +4,7 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 
-import com.myzillawr.simpleserver.http.LuaPage;
+import com.myzillawr.simpleserver.http.page.lua.LuaPage;
 
 public class LuaPageHelper {
 	private LuaPage page;

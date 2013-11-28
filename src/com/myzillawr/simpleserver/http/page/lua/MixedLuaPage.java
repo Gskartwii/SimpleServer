@@ -1,11 +1,12 @@
-package com.myzillawr.simpleserver.http;
+package com.myzillawr.simpleserver.http.page.lua;
 
 import java.util.ArrayList;
 
 import org.luaj.vm2.LuaError;
 
-import com.myzillawr.simpleserver.Util;
+import com.myzillawr.simpleserver.http.HttpRequest;
 import com.myzillawr.simpleserver.lua.SimpleServerLua;
+import com.myzillawr.simpleserver.util.Util;
 
 public class MixedLuaPage extends LuaPage{
 	public MixedLuaPage(HttpRequest req){

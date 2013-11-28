@@ -20,7 +20,7 @@ import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
 import org.luaj.vm2.lib.jse.JseOsLib;
 
-import com.myzillawr.simpleserver.StringInputStream;
+import com.myzillawr.simpleserver.util.StringInputStream;
 
 public class SimpleServerLua extends Globals{
 	public SimpleServerLua(){

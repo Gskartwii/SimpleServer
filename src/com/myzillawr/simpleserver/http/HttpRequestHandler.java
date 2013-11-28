@@ -1,4 +1,4 @@
-package com.myzillawr.simpleserver;
+package com.myzillawr.simpleserver.http;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.myzillawr.simpleserver.http.HttpRequest;
+import com.myzillawr.simpleserver.SimpleServer;
 
 public class HttpRequestHandler extends Thread{
 	public Socket client;
@@ -99,7 +99,7 @@ public class HttpRequestHandler extends Thread{
 	@Override
 	public void run(){
 		if(_server.get("REQUEST_URI") != null){
-			String page = "/";
+			File servePage = server.getDocumentRoot();
 			String pageTemp = (String)_server.get("REQUEST_URI");
 			int qPos = pageTemp.indexOf("?");
 			if(qPos != -1){
@@ -109,26 +109,14 @@ public class HttpRequestHandler extends Thread{
 				pageTemp = pageTemp.substring(1);
 			}
 			String[] pagePart = pageTemp.split("/");
-			String endBit = null;
 			for(int i = 0; i < pagePart.length; i++){
 				if(pagePart[i] != ".." && pagePart[i] != "../" && pagePart[i] != "..\\" && pagePart[i] != "/.." && pagePart[i] != "\\.." && pagePart[i] != "/../" && pagePart[i] != "\\..\\"){
-					endBit = pagePart[i];
-					if(new File(server.getDocumentRoot(), page + pagePart[i]).exists()){
-						page = page + pagePart[i];
+					if(new File(servePage, pagePart[i]).exists()){
+						servePage = new File(servePage, pagePart[i]);
 					}else{
 						break;
 					}
 				}
-			}
-			page = page.replace("/", "\\");
-			if(endBit != null){
-				if(page.endsWith("\\")){
-					page = page + endBit;
-				}
-			}
-			File servePage = new File(server.getDocumentRoot().getAbsolutePath() + page);
-			if(servePage.isDirectory()){
-				servePage = new File(servePage, "index.lua");
 			}
 			new HttpRequest(this, servePage);
 		}
@@ -137,5 +125,13 @@ public class HttpRequestHandler extends Thread{
 
 	public String dateFormat(Date date){
 		return server.dateFormat(date);
+	}
+
+	public String[] getIndexNames(){
+		return server.getIndexNames();
+	}
+
+	public int getServerPort(){
+		return server.getServerPort();
 	}
 }

@@ -4,6 +4,12 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
+import com.myzillawr.simpleserver.http.page.ContentPage;
+import com.myzillawr.simpleserver.http.page.ImagePage;
+import com.myzillawr.simpleserver.http.page.Page;
+import com.myzillawr.simpleserver.http.page.lua.FullLuaPage;
+import com.myzillawr.simpleserver.http.page.lua.MixedLuaPage;
+
 public class ContentType {
 	private static HashMap<String, String> cTypes;
 	static{

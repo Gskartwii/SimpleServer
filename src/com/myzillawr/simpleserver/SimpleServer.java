@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 import com.myzillawr.simpleserver.config.ServerConfig;
+import com.myzillawr.simpleserver.http.HttpRequestHandler;
 
 public class SimpleServer implements Runnable{
 	private ServerConfig config;
@@ -122,5 +123,13 @@ public class SimpleServer implements Runnable{
 
 	public File getDocumentRoot(){
 		return documentRoot;
+	}
+
+	public String[] getIndexNames(){
+		return config.getIndexNames();
+	}
+
+	public int getServerPort(){
+		return config.getPort();
 	}
 }
