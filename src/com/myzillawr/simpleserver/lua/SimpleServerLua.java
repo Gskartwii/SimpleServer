@@ -35,6 +35,7 @@ public class SimpleServerLua extends Globals{
 		LuaC.install();
 		compiler = LuaC.instance;
 		set("_VERSION", "Lua 5.2");
+		set("loadstring", get("load"));
 	}
 
 	public void dolocalfile(File file){

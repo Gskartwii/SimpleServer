@@ -27,7 +27,8 @@ public abstract class LuaPage extends Page{
 			SimpleServerLua lua = new LuaPageHelper(this).setupEnv();
 			String content = Util.fileToString(req);
 			handleScript(lua, content);
-			lua.get("exit").call();
+			handleHTMLContent();
+			close();
 		}catch(LuaError e){
 			int line = e.getErrorLine();
 			String msg = e.getErrorMessage();
