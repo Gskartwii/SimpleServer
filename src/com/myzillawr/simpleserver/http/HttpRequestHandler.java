@@ -18,6 +18,8 @@ public class HttpRequestHandler extends Thread{
 	public BufferedWriter out;
 	
 	public HashMap<String, Object> _server;
+	public HashMap<String, Object> _get;
+	public HashMap<String, Object> _post;
 	
 	private SimpleServer server;
 	
@@ -36,6 +38,10 @@ public class HttpRequestHandler extends Thread{
 		String[] remoteaddr = client.getRemoteSocketAddress().toString().substring(1).split(":");
 		_server.put("REMOTE_ADDR", remoteaddr[0]);
 		_server.put("REMOTE_PORT", remoteaddr[1]);
+		_server.put("DOCUMENT_ROOT", server.getServerDefaults().get("DOCUMENT_ROOT"));
+		
+		_get = new HashMap<String, Object>();
+		_post = new HashMap<String, Object>();
 		
 		String s;
 		while((s = in.readLine()) != null){
@@ -74,6 +80,22 @@ public class HttpRequestHandler extends Thread{
 		}
 		if(!_server.containsKey("QUERY_STRING")){
 			_server.put("QUERY_STRING", "");
+		}
+		if(((String)_server.get("QUERY_STRING")).length() > 0){
+			System.out.println("QString");
+			String[] getSplices = ((String)_server.get("QUERY_STRING")).split("\\&");
+			for(int i = 0; i < getSplices.length; i++){
+				int iOf = getSplices[i].indexOf("=");
+				if(iOf != -1){
+					String key = getSplices[i].substring(0, iOf);
+					String val = getSplices[i].substring(iOf, getSplices[i].length());
+					if(key.length() > 0){
+						_get.put(key, val);
+					}
+				}else{
+					_get.put(getSplices[i], new NoEntry());
+				}
+			}
 		}
 	}
 	
@@ -134,4 +156,6 @@ public class HttpRequestHandler extends Thread{
 	public int getServerPort(){
 		return server.getServerPort();
 	}
+	
+	public static final class NoEntry{}
 }

@@ -19,6 +19,7 @@ import org.luaj.vm2.lib.jse.JseBaseLib;
 import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
 import org.luaj.vm2.lib.jse.JseOsLib;
+import org.luaj.vm2.lib.DebugLib;
 
 import com.myzillawr.simpleserver.util.StringInputStream;
 
@@ -32,6 +33,7 @@ public class SimpleServerLua extends Globals{
 		load(new JseMathLib());
 		load(new JseIoLib());
 		load(new JseOsLib());
+		load(new DebugLib());
 		LuaC.install();
 		compiler = LuaC.instance;
 		set("_VERSION", "Lua 5.2");

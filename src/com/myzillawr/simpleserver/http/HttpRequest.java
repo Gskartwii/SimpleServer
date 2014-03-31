@@ -65,8 +65,16 @@ public class HttpRequest {
 		}
 	}
 
-	public HashMap<String, Object> getServer(){
+	public HashMap<String, Object> getSERVER(){
 		return handler._server;
+	}
+	
+	public HashMap<String, Object> getGET(){
+		return handler._get;
+	}
+	
+	public HashMap<String, Object> getPOST(){
+		return handler._post;
 	}
 	
 	public void close(){
@@ -78,6 +86,16 @@ public class HttpRequest {
 		if(!handler.client.isClosed()){
 			try{
 				handler.out.write(string);
+			}catch(IOException e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void out(byte[] bytes){
+		if(!handler.client.isClosed()){
+			try{
+				handler.client.getOutputStream().write(bytes);
 			}catch(IOException e){
 				e.printStackTrace();
 			}
@@ -104,7 +122,7 @@ public class HttpRequest {
 	}
 
 	public void handleError(int statusCode, String status){
-		String htmlContent = "<!DOCTYPE HTML><html><head><title>" + statusCode + " " + status + "</title></head><body><h1>" + status + "</h1><p>The requested file was not found on this server.</p><hr><address>SimpleServer Port 80</address></body></html>";
+		String htmlContent = "<!DOCTYPE html><html><head><title>" + statusCode + " " + status + "</title></head><body><h1>" + status + "</h1><p>The requested file was not found on this server.</p><hr><address>SimpleServer Port 80</address></body></html>";
 		out("HTTP/1.0 " + statusCode + " " + status + "\r\n");
 		standardHeaders();
 		out("Content-Type: text/html\r\n");
@@ -120,7 +138,7 @@ public class HttpRequest {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		cal.add(Calendar.DAY_OF_MONTH, 1);
-		out("Expires: " + DateFormat(cal.getTime()) + "\r\n");
+		//out("Expires: " + DateFormat(cal.getTime()) + "\r\n");
 	}
 
 	public String DateFormat(Date date){

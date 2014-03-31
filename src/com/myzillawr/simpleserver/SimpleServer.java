@@ -100,7 +100,7 @@ public class SimpleServer implements Runnable{
 			serverDefaults.put("SERVER_ADDR", getIp());
 			serverDefaults.put("SERVER_SOFTWARE", "Myzilla Web Resources SimpleServer");
 			serverDefaults.put("DOCUMENT_ROOT", documentRoot.getAbsolutePath());
-			while(true){
+			while(running){
 				try{
 					Socket client = serv.accept();
 					new HttpRequestHandler(client, this).start();
