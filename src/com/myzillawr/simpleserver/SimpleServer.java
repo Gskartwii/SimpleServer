@@ -2,8 +2,6 @@ package com.myzillawr.simpleserver;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -68,14 +66,8 @@ public class SimpleServer implements Runnable{
 			Enumeration<InetAddress> addresses = element.getInetAddresses();
 			while(addresses.hasMoreElements()){
 				InetAddress ip = addresses.nextElement();
-				if(ip instanceof Inet4Address){
-					if(ip.isSiteLocalAddress()){
-						ipAddress = ip.getHostAddress();
-					}
-				}else if(ip instanceof Inet6Address){
-					if(ip.isSiteLocalAddress()){
-						ipAddress = ip.getHostAddress();
-					}
+				if(ip.isSiteLocalAddress()){
+					ipAddress = ip.getHostAddress();
 				}
 			}
 		}

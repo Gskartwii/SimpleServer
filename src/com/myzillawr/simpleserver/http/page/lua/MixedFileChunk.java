@@ -1,6 +1,7 @@
 package com.myzillawr.simpleserver.http.page.lua;
 
-import com.myzillawr.simpleserver.lua.SimpleServerLua;
+import com.myzillawr.luabase.lua.LuaVM;
+import com.myzillawr.simpleserver.lua.SimpleServerGlobals;
 
 public class MixedFileChunk {
 	private String content;
@@ -11,9 +12,10 @@ public class MixedFileChunk {
 		this.isLua = isLua;
 	}
 	
-	public void handleContent(SimpleServerLua lua, String chunkName){
+	public void handleContent(LuaVM lua, String chunkName){
 		if(isLua){
-			lua.dostring(chunkName, content);
+			SimpleServerGlobals ssg = (SimpleServerGlobals)lua.getGlobals();
+			ssg.loadstring(chunkName, content).call();
 		}else{
 			lua.get("write").call(content);
 		}

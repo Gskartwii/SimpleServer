@@ -5,52 +5,30 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
-import org.luaj.vm2.compiler.LuaC;
-import org.luaj.vm2.lib.Bit32Lib;
-import org.luaj.vm2.lib.PackageLib;
-import org.luaj.vm2.lib.StringLib;
-import org.luaj.vm2.lib.TableLib;
 import org.luaj.vm2.lib.VarArgFunction;
-import org.luaj.vm2.lib.jse.JseBaseLib;
-import org.luaj.vm2.lib.jse.JseIoLib;
-import org.luaj.vm2.lib.jse.JseMathLib;
-import org.luaj.vm2.lib.jse.JseOsLib;
-import org.luaj.vm2.lib.DebugLib;
 
+import com.myzillawr.luabase.lua.BaseGlobals;
 import com.myzillawr.simpleserver.util.StringInputStream;
 
-public class SimpleServerLua extends Globals{
-	public SimpleServerLua(){
-		load(new JseBaseLib());
-		load(new PackageLib());
-		load(new Bit32Lib());
-		load(new TableLib());
-		load(new StringLib());
-		load(new JseMathLib());
-		load(new JseIoLib());
-		load(new JseOsLib());
-		load(new DebugLib());
-		LuaC.install();
-		compiler = LuaC.instance;
-		set("_VERSION", "Lua 5.2");
-		set("loadstring", get("load"));
-	}
-
-	public void dolocalfile(File file){
-		set("print", new print("[" + file.getName() + "] "));
-		dofile(file, true);
+public class SimpleServerGlobals extends BaseGlobals{
+	public SimpleServerGlobals(){
+		super();
 	}
 	
-	public void dostring(String fileName, String content){
+	public LuaValue dolocalfile(File file){
+		set("print", new print("[" + file.getName() + "] "));
+		return loadfile(file, true);
+	}
+	
+	public LuaValue loadstring(String fileName, String content){
 		set("print", new print("[" + fileName + "] "));
 		StringInputStream is = null;
 		try{
 			is = new StringInputStream(content);
-			baselib.loadStream(is, fileName, "bt", this).arg1().invoke();
+			return baselib.loadStream(is, fileName, "bt", this).arg1();
 		}finally{
 			if(is != null){
 				try{
@@ -62,12 +40,12 @@ public class SimpleServerLua extends Globals{
 		}
 	}
 	
-	public void dofile(File file){
+	public LuaValue loadfile(File file){
 		set("print", new print("[" + file.getName() + "] "));
-		dofile(file, false);
+		return loadfile(file, false);
 	}
 	
-	private void dofile(File file, boolean local){
+	private LuaValue loadfile(File file, boolean local){
 		String chunkname = file.getAbsolutePath();
 		if(local){
 			chunkname = file.getName();
@@ -76,7 +54,7 @@ public class SimpleServerLua extends Globals{
 			FileInputStream is = null;
 			try{
 				is = new FileInputStream(file);
-				baselib.loadStream(is, chunkname, "bt", this).arg1().invoke();
+				return baselib.loadStream(is, chunkname, "bt", this).arg1();
 			}catch(FileNotFoundException e){
 				e.printStackTrace();
 			}finally{
@@ -89,6 +67,7 @@ public class SimpleServerLua extends Globals{
 				}
 			}
 		}
+		return LuaValue.NIL;
 	}
 	
 	public LuaValue tostring(LuaValue arg){
@@ -116,7 +95,7 @@ public class SimpleServerLua extends Globals{
 				if(i > 1){
 					System.out.write(' ');
 				}
-				LuaString s = SimpleServerLua.this.tostring(args.arg(i)).strvalue();
+				LuaString s = SimpleServerGlobals.this.tostring(args.arg(i)).strvalue();
 				System.out.write(s.m_bytes, s.m_offset, s.m_length);
 			}
 			System.out.write('\n');

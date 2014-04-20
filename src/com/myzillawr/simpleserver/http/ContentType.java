@@ -14,8 +14,8 @@ public class ContentType {
 	private static HashMap<String, String> cTypes;
 	static{
 		cTypes = new HashMap<String, String>();
-		//Lua
-		cTypes.put(".lua", "text/html"); //This one can be changed using the header() function.
+		//Lua (Can be changed using the header() function.)
+		cTypes.put(".lua", "text/html");
 		cTypes.put(".lhtm", "text/html");
 		cTypes.put(".lhtml", "text/html");
 		

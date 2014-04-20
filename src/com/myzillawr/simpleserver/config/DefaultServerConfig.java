@@ -5,9 +5,10 @@ import java.util.ArrayList;
 
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
-import org.luaj.vm2.lib.ZeroArgFunction;
+import org.luaj.vm2.lib.jse.CoerceLuaToJava;
 
-import com.myzillawr.simpleserver.lua.SimpleServerLua;
+import com.myzillawr.luabase.lua.BaseGlobals;
+import com.myzillawr.luabase.lua.LuaVM;
 
 public class DefaultServerConfig extends ServerConfig{
 	private int port;
@@ -19,8 +20,7 @@ public class DefaultServerConfig extends ServerConfig{
 	private Boolean tthreaded = null;
 	private String tdocumentRoot = null;
 	private ArrayList<String> tindexNames = null;
-	private boolean ranLua = false;
-	
+
 	public DefaultServerConfig(){
 		this(80, false, "/www");
 	}
@@ -29,83 +29,76 @@ public class DefaultServerConfig extends ServerConfig{
 		tindexNames = new ArrayList<String>();
 		if(configFile.exists()){
 			try{
-				final SimpleServerLua lua = new SimpleServerLua();
-				lua.set("setPort", new OneArgFunction(){
+				final LuaVM lvm = new LuaVM();
+				lvm.set("setPort", new OneArgFunction(){
 					@Override
 					public LuaValue call(LuaValue arg){
 						if(!arg.isint()){
-							throw new RuntimeException("setPort: Argument 1 must be an integer.");
+							throw new RuntimeException("Argument 1 expected integer, got " + arg.typename());
 						}else{
-							tport = new Integer(arg.toint());
-							lua.set("setPort", NIL);
+							tport = arg.toint();
 						}
 						return NIL;
 					}
 				});
-				lua.set("setThreaded", new OneArgFunction(){
+				lvm.set("setThreaded", new OneArgFunction(){
 					@Override
 					public LuaValue call(LuaValue arg){
 						if(!arg.isboolean()){
-							throw new RuntimeException("setThreaded: Argument 1 must be a boolean.");
+							throw new RuntimeException("Argument 1 expected boolean, got " + arg.typename());
 						}else{
 							tthreaded = arg.toboolean();
-							lua.set("setThreaded", NIL);
 						}
 						return NIL;
 					}
 				});
-				lua.set("setDocumentRoot", new OneArgFunction(){
+				lvm.set("setDocumentRoot", new OneArgFunction(){
 					@Override
 					public LuaValue call(LuaValue arg){
-						if(!arg.isstring()){
-							throw new RuntimeException("setDocumentRoot: Argument 1 must be a string.");
+						if(!arg.isstring() || arg.isuserdata(com.myzillawr.luabase.noninstance.io.File.class)){
+							throw new RuntimeException("Argument 1 expected string or File, got " + arg.typename());
 						}else{
-							tdocumentRoot = arg.tojstring();
-							lua.set("setDocumentRoot", NIL);
+							if(arg.isuserdata(com.myzillawr.luabase.noninstance.io.File.class)){
+								tdocumentRoot = ((com.myzillawr.luabase.noninstance.io.File)CoerceLuaToJava.coerce(arg, com.myzillawr.luabase.noninstance.io.File.class)).GetAbsolutePath();
+							}else{
+								tdocumentRoot = arg.tojstring();
+							}
 						}
 						return NIL;
 					}
 				});
-				lua.set("addDirectoryIndex", new OneArgFunction(){
+				lvm.set("addDirectoryIndex", new OneArgFunction(){
 					@Override
 					public LuaValue call(LuaValue arg){
 						if(!arg.isstring()){
-							throw new RuntimeException("addDirectoryIndex: Argument 1 must be a string.");
+							throw new RuntimeException("Argument 1 expected string, got " + arg.typename());
 						}else{
 							tindexNames.add(arg.tojstring());
 						}
 						return NIL;
 					}
 				});
-				lua.dolocalfile(configFile);
-				lua.set("exitConfig", new ZeroArgFunction(){
-					@Override
-					public LuaValue call(){
-						if(tport != null){
-							port = tport;
-						}else{
-							port = 80;
-						}
-						if(tthreaded != null){
-							threaded = tthreaded;
-						}else{
-							threaded = false;
-						}
-						if(tdocumentRoot != null){
-							documentRoot = tdocumentRoot;
-						}else{
-							documentRoot = "www/";
-						}
-						indexNames = tindexNames.toArray(new String[tindexNames.size()]);
-						ranLua = true;
-						return NIL;
-					}
-				});
-				lua.get("exitConfig").call();
-				while(!ranLua){
-					System.out.println("Waiting");
-					Thread.sleep(5);
+				lvm.doFile(configFile);
+				BaseGlobals _G = (BaseGlobals)lvm.getGlobals();
+				if(_G.lbl.hasDelays()){
+					_G.lbl.OnComplete.waitFunc();
 				}
+				if(tport != null){
+					port = tport;
+				}else{
+					port = 80;
+				}
+				if(tthreaded != null){
+					threaded = tthreaded;
+				}else{
+					threaded = false;
+				}
+				if(tdocumentRoot != null){
+					documentRoot = tdocumentRoot;
+				}else{
+					documentRoot = "www/";
+				}
+				indexNames = tindexNames.toArray(new String[tindexNames.size()]);
 			}catch (Exception e){
 				e.printStackTrace();
 			}

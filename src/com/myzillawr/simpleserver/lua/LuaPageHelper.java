@@ -11,19 +11,13 @@ import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
+import com.myzillawr.luabase.lua.LuaVM;
 import com.myzillawr.simpleserver.http.HttpRequestHandler.NoEntry;
 import com.myzillawr.simpleserver.http.page.lua.LuaPage;
 
-public class LuaPageHelper {
-	private LuaPage page;
-	
-	public LuaPageHelper(LuaPage page){
-		this.page = page;
-	}
-	
-	public SimpleServerLua setupEnv(){
-		SimpleServerLua lua = new SimpleServerLua();
-		lua.set("die", new OneArgFunction(){
+public final class LuaPageHelper {
+	public static final LuaVM setupEnv(final LuaPage page, LuaVM chunk){
+		chunk.set("die", new OneArgFunction(){
 			@Override
 			public LuaValue call(LuaValue arg){
 				page.write(arg.tojstring());
@@ -32,31 +26,18 @@ public class LuaPageHelper {
 				return NIL;
 			}
 		});
-		lua.set("write", new OneArgFunction(){
+		chunk.set("write", new OneArgFunction(){
 			@Override
 			public LuaValue call(LuaValue arg){
 				page.write(arg.tojstring());
 				return NIL;
 			}
 		});
-		lua.set("exit", new ZeroArgFunction(){
+		chunk.set("exit", new ZeroArgFunction(){
 			@Override
 			public LuaValue call(){
 				page.handleHTMLContent();
 				page.close();
-				return NIL;
-			}
-		});
-		lua.set("wait", new OneArgFunction(){
-			@Override
-			public LuaValue call(LuaValue arg){
-				double waitTime = arg.optdouble(0.032);
-				long fullWaitTime = (long)(waitTime * 1000.0);
-				try{
-					Thread.sleep(fullWaitTime);
-				}catch(InterruptedException e){
-					e.printStackTrace();
-				}
 				return NIL;
 			}
 		});
@@ -77,7 +58,7 @@ public class LuaPageHelper {
 				SERVER.set(SERVERKeys[i].toString(), CoerceJavaToLua.coerce(keyVal));
 			}
 		}
-		lua.set("SERVER", SERVER);
+		chunk.set("SERVER", SERVER);
 		
 		LuaTable GET = new LuaTable();
 		HashMap<String, Object> GETMap = page.req.getGET();
@@ -98,7 +79,28 @@ public class LuaPageHelper {
 				GET.set(GETKeys[i].toString(), CoerceJavaToLua.coerce(keyVal));
 			}
 		}
-		lua.set("GET", GET);
-		return lua;
+		chunk.set("GET", GET);
+		
+		LuaTable POST = new LuaTable();
+		HashMap<String, Object> POSTMap = page.req.getPOST();
+		Object[] POSTKeys = POSTMap.keySet().toArray();
+		for(int i = 0; i < POSTKeys.length; i++){
+			Object keyVal = POSTMap.get(POSTKeys[i]);
+			if(keyVal instanceof NoEntry){
+				POST.insert(POST.length() + 1, LuaValue.valueOf(POSTKeys[i].toString()));
+			}else if(keyVal instanceof String){
+				POST.set(POSTKeys[i].toString(), LuaString.valueOf((String)keyVal));
+			}else if(keyVal instanceof Integer){
+				POST.set(POSTKeys[i].toString(), LuaNumber.valueOf((int)keyVal));
+			}else if(keyVal instanceof Double){
+				POST.set(POSTKeys[i].toString(), LuaNumber.valueOf((double)keyVal));
+			}else if(keyVal instanceof Boolean){
+				POST.set(POSTKeys[i].toString(), LuaBoolean.valueOf((boolean)keyVal));
+			}else{
+				POST.set(POSTKeys[i].toString(), CoerceJavaToLua.coerce(keyVal));
+			}
+		}
+		chunk.set("POST", POST);
+		return chunk;
 	}
 }

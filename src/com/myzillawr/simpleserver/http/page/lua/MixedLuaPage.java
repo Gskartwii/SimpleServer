@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.luaj.vm2.LuaError;
 
+import com.myzillawr.luabase.lua.LuaVM;
 import com.myzillawr.simpleserver.http.HttpRequest;
-import com.myzillawr.simpleserver.lua.SimpleServerLua;
 import com.myzillawr.simpleserver.util.Util;
 
 public class MixedLuaPage extends LuaPage{
@@ -14,7 +14,7 @@ public class MixedLuaPage extends LuaPage{
 	}
 
 	@Override
-	public void handleScript(SimpleServerLua lua, String contents) throws LuaError {
+	public void handleScript(LuaVM lua, String contents) throws LuaError {
 		ArrayList<MixedFileChunk> chunks = new ArrayList<MixedFileChunk>();
 		int indexOf = -1;
 		int currentLine = 0;

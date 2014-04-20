@@ -17,4 +17,6 @@ write("<hr/><h4>SERVER Table Contents</h4>");
 search(SERVER, 0);
 write("<hr/><h4>GET Table Contents</h4>");
 search(GET, 0);
+write("<hr/><h4>POST Table Contents</h4>");
+search(POST, 0);
 write("</body></html>");

@@ -4,13 +4,16 @@ import java.util.Date;
 
 import org.luaj.vm2.LuaError;
 
+import com.myzillawr.luabase.lua.LuaVM;
 import com.myzillawr.simpleserver.http.HttpRequest;
 import com.myzillawr.simpleserver.http.page.Page;
 import com.myzillawr.simpleserver.lua.LuaPageHelper;
-import com.myzillawr.simpleserver.lua.SimpleServerLua;
+import com.myzillawr.simpleserver.lua.SimpleServerGlobals;
 import com.myzillawr.simpleserver.util.Util;
 
 public abstract class LuaPage extends Page{
+	private static LuaVM mainVM = new LuaVM(new SimpleServerGlobals());
+	
 	private String htmlContent;
 	
 	public LuaPage(HttpRequest req){
@@ -24,12 +27,13 @@ public abstract class LuaPage extends Page{
 			htmlContent = "";
 		}
 		try{
-			SimpleServerLua lua = new LuaPageHelper(this).setupEnv();
 			String content = Util.fileToString(req);
-			handleScript(lua, content);
+			LuaPageHelper.setupEnv(this, mainVM);
+			handleScript(mainVM, content);
 			handleHTMLContent();
 			close();
 		}catch(LuaError e){
+			e.printStackTrace();
 			int line = e.getErrorLine();
 			String msg = e.getErrorMessage();
 			write("Fatal Error: <b>" + msg + "</b> on line <b>" + line + "</b>");
@@ -41,7 +45,7 @@ public abstract class LuaPage extends Page{
 		}
 	}
 	
-	public abstract void handleScript(SimpleServerLua lua, String contents) throws LuaError;
+	public abstract void handleScript(LuaVM lua, String contents) throws LuaError;
 	
 	public void handleHTMLContent(){
 		req.out("HTTP/1.0 200 OK\r\n");

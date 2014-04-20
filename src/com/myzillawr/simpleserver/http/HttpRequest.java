@@ -36,7 +36,8 @@ public class HttpRequest {
 						fileList = fileList + '\n';
 					}
 				}
-				serverPage("Index of " + (String)handler._server.get("REQUEST_URI"), "<h1>Index of " + (String)handler._server.get("REQUEST_URI") + "</h1><ul>" + fileList + "</ul>", "200 OK");
+				String currentTitle = "Index of " + stripQuery((String)handler._server.get("REQUEST_URI"));
+				serverPage(currentTitle, "<h1>" + currentTitle + "</h1><ul>" + fileList + "</ul>", "200 OK");
 				
 			}else{
 				handlePage();
@@ -50,6 +51,14 @@ public class HttpRequest {
 		}
 	}
 	
+	private String stripQuery(String string){
+		int qPos = string.indexOf("?");
+		if(qPos != -1){
+			string = string.substring(0, qPos);
+		}
+		return string;
+	}
+
 	private void handlePage(){
 		if(file.exists()){
 			try{
@@ -77,9 +86,13 @@ public class HttpRequest {
 		return handler._post;
 	}
 	
+	public String getPOSTContent(){
+		return handler.postReturn;
+	}
+	
 	public void close(){
 		handler.close();
-		Thread.currentThread().interrupt();
+		//Thread.currentThread().interrupt();
 	}
 	
 	public void out(String string){
